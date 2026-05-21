@@ -15,11 +15,19 @@ namespace AppAny.Quartz.EntityFrameworkCore.Migrations.MySql.Tests
     {
       this._connectionString = fixture.ConnectionString;
 
+#if NET10_0_OR_GREATER
+      // Oracle MySQL provider uses UseMySQL (capital SQL) and doesn't require ServerVersion parameter
+      var options = new DbContextOptionsBuilder<MySqlIntegrationDbContext>()
+        .UseMySQL(this._connectionString)
+        .Options;
+#else
+      // Pomelo provider uses UseMySql and requires ServerVersion parameter (NET8_0)
       var options = new DbContextOptionsBuilder<MySqlIntegrationDbContext>()
         .UseMySql(
           this._connectionString,
           ServerVersion.AutoDetect(fixture.ConnectionString))
         .Options;
+#endif
 
       this._dbContext = new MySqlIntegrationDbContext(options);
     }
