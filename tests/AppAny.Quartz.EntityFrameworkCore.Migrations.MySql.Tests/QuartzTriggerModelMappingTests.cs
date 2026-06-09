@@ -9,11 +9,19 @@ public class QuartzTriggerModelMappingTests
   [Fact]
   public void ShouldMapMisfireOriginalFireTimeColumn()
   {
+#if NET10_0_OR_GREATER
+    // Oracle MySQL provider uses UseMySQL (capital SQL) and doesn't require ServerVersion parameter
+    var options = new DbContextOptionsBuilder<MySqlIntegrationDbContext>()
+      .UseMySQL("Server=localhost;Port=3306;Database=quartz_mapping_tests;User=root;Password=password")
+      .Options;
+#else
+    // Pomelo provider uses UseMySql and requires ServerVersion parameter (NET8_0)
     var options = new DbContextOptionsBuilder<MySqlIntegrationDbContext>()
       .UseMySql(
         "Server=localhost;Port=3306;Database=quartz_mapping_tests;User=root;Password=password",
         ServerVersion.Parse("8.0.36-mysql"))
       .Options;
+#endif
 
     using var dbContext = new MySqlIntegrationDbContext(options);
     var entityType = dbContext.Model.FindEntityType(typeof(QuartzTrigger));
